@@ -1,14 +1,6 @@
 // components/SettingsMenu.tsx
 import React from 'react';
-import {
-    Modal,
-    TouchableOpacity,
-    View,
-    Text,
-    StyleSheet,
-    Alert,
-} from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import { Modal, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 type Props = {
     visible: boolean;
@@ -18,52 +10,67 @@ type Props = {
     onOpenNotificationSettings: () => void;
 };
 
-export default function SettingsMenu({ visible, onClose, onOpenCategoryManager, onClearData }: Props) {
+const SettingsMenu = ({
+    visible,
+    onClose,
+    onOpenCategoryManager,
+    onClearData,
+    onOpenNotificationSettings,
+    }: Props) => {
     return (
-        <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
-        <TouchableOpacity style={styles.overlay} activeOpacity={1} onPressOut={onClose}>
-            <View style={styles.card}>
-            <Text style={styles.title}><AntDesign name="setting" size={25} color="#333" />設定</Text>
-
-            <TouchableOpacity style={styles.item} onPress={() => {
-                onClose();
+        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+        <View style={styles.overlay}>
+            <View style={styles.menuCard}>
+            <Text style={styles.menuTitle}>設定メニュー</Text>
+            <TouchableOpacity
+                style={styles.menuButton}
+                onPress={() => {
                 onOpenCategoryManager();
-            }}>
-                <Text style={styles.text}>カテゴリの管理</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.item} onPress={() => {
                 onClose();
-                onOpenNotificationSettings();
-            }}>
-                <Text style={styles.text}>通知設定</Text>
+                }}
+            >
+                <Text style={styles.menuButtonText}>カテゴリ管理</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity style={styles.item} onPress={() => {
-                Alert.alert('確認', 'すべて削除しますか？', [
-                { text: 'キャンセル', style: 'cancel' },
-                {
-                    text: '削除',
-                    style: 'destructive',
-                    onPress: () => {
-                    onClose();
-                    onClearData();
-                    },
-                },
-                ]);
-            }}>
-                <Text style={[styles.text, { color: 'red' }]}>全データ削除</Text>
+            <TouchableOpacity
+                style={styles.menuButton}
+                onPress={() => {
+                onOpenNotificationSettings();
+                onClose();
+                }}
+            >
+                <Text style={styles.menuButtonText}>通知設定</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.menuButton}
+                onPress={() => {
+                onClearData();
+                onClose();
+                }}
+            >
+                <Text style={[styles.menuButtonText, { color: '#d32f2f' }]}>全データ削除</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                <Text style={styles.closeButtonText}>閉じる</Text>
             </TouchableOpacity>
             </View>
-        </TouchableOpacity>
+        </View>
         </Modal>
     );
-}
+};
+
+export default SettingsMenu;
 
 const styles = StyleSheet.create({
-    overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.2)', justifyContent: 'flex-start', paddingTop:100 },
-    card: { backgroundColor: '#fff', padding: 20, marginHorizontal: 20, borderRadius: 12, elevation: 6 },
-    title: { fontSize: 25, verticalAlign: 'middle', fontWeight: 'bold', marginBottom: 16 },
-    item: { paddingVertical: 10 },
-    text: { fontSize: 16, color: '#333' },
+    overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.2)', justifyContent: 'center', alignItems: 'center' },
+    menuCard: { backgroundColor: '#fff', borderRadius: 20, padding: 24, width: '80%' },
+    menuTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 18, textAlign: 'center' },
+    menuButton: {
+        paddingVertical: 14,
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    menuButtonText: { fontSize: 16, color: '#333' },
+    closeButton: { marginTop: 20, alignItems: 'center' },
+    closeButtonText: { color: '#888', fontSize: 15 },
 });

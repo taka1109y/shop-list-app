@@ -1,22 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Text,
-  View,
-  SafeAreaView,
-  StyleSheet,
-  TouchableOpacity,
-  SectionList,
-  Modal,
-  TextInput,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
-} from 'react-native';
+import {Text, View, SafeAreaView, StyleSheet, TouchableOpacity, SectionList, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, Image,} from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign } from '@expo/vector-icons';
+import * as Notifications from 'expo-notifications';
 
 import SettingsMenu from './components/SettingsMenu';
 import CategoryManager from './components/CategoryManager';
@@ -24,6 +12,8 @@ import TemplateManager, { TemplateItem } from './components/TemplateManager';
 import NotificationSettingsModal from './components/NotificationSettingsModal';
 
 const STORAGE_KEY = 'SHOPPING_LIST_DATA';
+const NOTIF_ENABLED_KEY = 'NOTIF_ENABLED';
+const NOTIF_TIME_KEY = 'NOTIF_TIME';
 
 export type Category = {
   name: string;
@@ -61,6 +51,8 @@ export default function App() {
   const [editOpen, setEditOpen] = useState(false);
   const [templateVisible, setTemplateVisible] = useState(false);
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
+  const [notificationEnabled, setNotificationEnabled] = useState(false);
+  const [notificationTime, setNotificationTime] = useState(new Date());
 
   const handleAddFromTemplate = (template: TemplateItem) => {
       const existing = data.find(
@@ -126,6 +118,76 @@ export default function App() {
       }
     }
   }, [categories]);
+
+  useEffect(() => {
+    Notifications.requestPermissionsAsync();
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+        // Expo SDK 49以降では下記2つも必要（iOSのみ有効）
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+
+  }, []);
+
+  useEffect(() => {
+    // 保存されている設定を読み込み
+    (async () => {
+      const enabled = await AsyncStorage.getItem(NOTIF_ENABLED_KEY);
+      const timeStr = await AsyncStorage.getItem(NOTIF_TIME_KEY);
+      setNotificationEnabled(enabled === '1');
+      setNotificationTime(timeStr ? new Date(timeStr) : new Date());
+    })();
+  }, []);
+
+  const scheduleNotification = async (time: Date) => {
+    // 既存の通知を全部キャンセル
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    if (!notificationEnabled) return;
+    const now = new Date();
+    let trigger = new Date(now);
+    trigger.setHours(time.getHours());
+    trigger.setMinutes(time.getMinutes());
+    trigger.setSeconds(0);
+    if (trigger < now) {
+      // 今日の時刻を過ぎていたら翌日に
+      trigger.setDate(trigger.getDate() + 1);
+    }
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "買い物リストの確認",
+        body: "まだリストが残っていませんか？忘れずチェック！",
+      },
+      trigger: {
+        type: 'calendar',
+        hour: trigger.getHours(),
+        minute: trigger.getMinutes(),
+        repeats: true,
+      } as any // ← 型エラー回避
+    });
+  };
+
+  const handleChangeEnabled = async (enabled: boolean) => {
+    setNotificationEnabled(enabled);
+    await AsyncStorage.setItem(NOTIF_ENABLED_KEY, enabled ? '1' : '0');
+    if (enabled) {
+      scheduleNotification(notificationTime);
+    } else {
+      await Notifications.cancelAllScheduledNotificationsAsync();
+    }
+  };
+
+  const handleChangeTime = async (date: Date) => {
+    setNotificationTime(date);
+    await AsyncStorage.setItem(NOTIF_TIME_KEY, date.toISOString());
+    if (notificationEnabled) {
+      scheduleNotification(date);
+    }
+  };
 
   const toggleAdded = (key: string) => {
     setData((prev) =>
@@ -246,6 +308,10 @@ export default function App() {
         <NotificationSettingsModal
           visible={notificationModalVisible}
           onClose={() => setNotificationModalVisible(false)}
+          notificationEnabled={notificationEnabled}
+          notificationTime={notificationTime}
+          onChangeEnabled={handleChangeEnabled}
+          onChangeTime={handleChangeTime}
         />
 
         <Image
@@ -395,7 +461,7 @@ export default function App() {
           style={[styles.fab, { right: 96 }]} // FABから少し左に配置
           onPress={() => setTemplateVisible(true)}
         >
-          <AntDesign name="profile" size={48} color="#ffb347" />
+          <AntDesign name="profile" size={56} color="#ffb347" />
         </TouchableOpacity>
 
         <TouchableOpacity

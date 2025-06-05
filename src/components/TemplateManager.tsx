@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    Modal,
-    TouchableOpacity,
-    StyleSheet,
-    TextInput,
-    FlatList,
-    Alert,
-} from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, TextInput, FlatList, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign } from '@expo/vector-icons';
 

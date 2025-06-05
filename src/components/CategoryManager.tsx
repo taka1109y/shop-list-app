@@ -1,14 +1,6 @@
 // components/CategoryManager.tsx
 import React, { useState } from 'react';
-import {
-    Modal,
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    Animated,
-} from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
 import { AntDesign } from '@expo/vector-icons';
 

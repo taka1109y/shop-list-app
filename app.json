@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.shopping-list-app"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,6 +25,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "cb7c33c0-5cb8-4374-960d-d4cb9e439632"
+      }
     }
   }
 }
