@@ -14,6 +14,8 @@ import NotificationSettingsModal from './components/NotificationSettingsModal';
 const STORAGE_KEY = 'SHOPPING_LIST_DATA';
 const NOTIF_ENABLED_KEY = 'NOTIF_ENABLED';
 const NOTIF_TIME_KEY = 'NOTIF_TIME';
+const ONBOARDING_KEY = 'has_seen_onboarding';
+
 
 export type Category = {
   name: string;
@@ -53,6 +55,21 @@ export default function App() {
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [notificationTime, setNotificationTime] = useState(new Date());
+
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    const check = async () => {
+      const seen = await AsyncStorage.getItem(ONBOARDING_KEY);
+      if (!seen) setShowOnboarding(true);
+    };
+    check();
+  }, []);
+
+  const closeOnboarding = async () => {
+    await AsyncStorage.setItem(ONBOARDING_KEY, '1');
+    setShowOnboarding(false);
+  };
 
   const handleAddFromTemplate = (template: TemplateItem) => {
       const existing = data.find(
@@ -218,8 +235,15 @@ export default function App() {
 
     return (
       <TouchableOpacity
-        style={[styles.card, { backgroundColor: color, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
-        onPress={() => toggleAdded(item.key)} // ← カード全体タップでエリア移動
+        style={[
+          styles.card,
+          {
+            backgroundColor: color,
+            flexDirection: 'column',
+            justifyContent: 'center',
+          },
+        ]}
+        onPress={() => toggleAdded(item.key)}
         onLongPress={() => {
           Alert.alert(
             '削除しますか？',
@@ -238,21 +262,34 @@ export default function App() {
         }}
         activeOpacity={0.85}
       >
-        <Text style={styles.cardText}>
-          {item.label} × {item.quantity}
-        </Text>
-        <TouchableOpacity
-          onPress={(e) => {
-            e.stopPropagation(); // ← これで鉛筆押してもカードonPressは発火しない
-            setEditItem(item);
-            setEditQuantity(item.quantity);
-            setEditCategory(item.category);
-          }}
-          style={{ paddingLeft: 12, paddingVertical: 6 }}
-        >
-          <AntDesign name="edit" size={24} color="#555" />
-        </TouchableOpacity>
+        {/* 商品名（1行目） */}
+      <Text
+        style={{ fontSize: 16, color: '#444', marginBottom: 2 }}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+      >
+        {item.label}
+      </Text>
+
+
+        {/* 数量と編集ボタン（2行目） */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={{ fontSize: 14, color: '#666' }}>× {item.quantity}</Text>
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              setEditItem(item);
+              setEditQuantity(item.quantity);
+              setEditCategory(item.category);
+            }}
+            style={{ paddingVertical: 4 }}
+          >
+            <AntDesign name="edit" size={20} color="#555" />
+          </TouchableOpacity>
+        </View>
       </TouchableOpacity>
+
+
     );
   };
 
@@ -276,6 +313,55 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={styles.container}>
+        {showOnboarding && (
+          <Modal animationType="slide" transparent={false}>
+            <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+              <View style={{ maxWidth: 320, width: '90%' }}>
+                <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' }}>
+                  アプリの使い方
+                </Text>
+
+                {/* アイコン付きの説明 */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                  <AntDesign name="pluscircle" size={20} color="#4caf50" style={{ marginRight: 8 }} />
+                  <Text style={{ fontSize: 16 }}>で商品を追加できます。</Text>
+                </View>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                  <AntDesign name="profile" size={20} color="#4caf50" style={{ marginRight: 8 }} />
+                  <Text style={{ fontSize: 16 }}>でテンプレートからまとめて追加できます。</Text>
+                </View>
+
+                {/* 操作説明（カード） */}
+                <Text style={{ fontSize: 16, marginBottom: 12 }}>
+                  ・商品カードをタップすると「候補 ↔ 買うもの」の移動ができます。
+                </Text>
+                <Text style={{ fontSize: 16, marginBottom: 12 }}>
+                  ・商品カードを長押しすると削除できます。
+                </Text>
+                <Text style={{ fontSize: 16, marginBottom: 12 }}>
+                  ・通知設定で買い忘れ防止リマインダーも使えます。
+                </Text>
+
+                <TouchableOpacity
+                  onPress={closeOnboarding}
+                  style={{
+                    marginTop: 24,
+                    padding: 12,
+                    backgroundColor: '#4caf50',
+                    borderRadius: 10,
+                  }}
+                >
+                  <Text style={{ color: 'white', textAlign: 'center', fontSize: 16 }}>
+                    使い始める
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </SafeAreaView>
+          </Modal>
+        )}
+
+
         <TouchableOpacity style={styles.menuIcon} onPress={() => setMenuVisible(true)}>
           <AntDesign name="setting" size={30} color="#333" />
         </TouchableOpacity>
@@ -328,6 +414,7 @@ export default function App() {
               renderSectionHeader={({ section: { title } }) => (
                 <Text style={styles.sectionHeader}>{title}</Text>
               )}
+              contentContainerStyle={{ paddingBottom: 100 }}
             />
           </View>
           <View style={styles.column}>
@@ -339,6 +426,7 @@ export default function App() {
               renderSectionHeader={({ section: { title } }) => (
                 <Text style={styles.sectionHeader}>{title}</Text>
               )}
+              contentContainerStyle={{ paddingBottom: 100 }}
             />
           </View>
         </View>
@@ -456,12 +544,11 @@ export default function App() {
           </KeyboardAvoidingView>
         </Modal>
 
-
         <TouchableOpacity
-          style={[styles.fab, { right: 96 }]} // FABから少し左に配置
+          style={[styles.fab, { right: 96 }]}
           onPress={() => setTemplateVisible(true)}
         >
-          <AntDesign name="profile" size={56} color="#ffb347" />
+          <AntDesign name="profile" size={56} color="#4caf50" />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -501,11 +588,13 @@ const styles = StyleSheet.create({
     color: '#444',
     borderRadius: 6,
     marginHorizontal: 4,
-    marginTop: 8,
   },
   card: {
-    padding: 14,
-    marginVertical: 6,
+    paddingTop: 8,
+    paddingBottom: 8,
+    paddingLeft: 16,
+    paddingRight: 16,
+    marginVertical: 4,
     marginHorizontal: 8,
     borderRadius: 14,
     shadowColor: '#ccc',

@@ -1,6 +1,6 @@
 // components/SettingsMenu.tsx
 import React from 'react';
-import { Modal, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { Modal, View, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 
 type Props = {
     visible: boolean;
@@ -43,10 +43,23 @@ const SettingsMenu = ({
             <TouchableOpacity
                 style={styles.menuButton}
                 onPress={() => {
-                onClearData();
-                onClose();
+                    Alert.alert(
+                    '全データ削除',
+                    '本当に全てのデータを削除しますか？\nこの操作は取り消せません。',
+                    [
+                        { text: 'キャンセル', style: 'cancel' },
+                        {
+                        text: '削除する',
+                        style: 'destructive',
+                        onPress: () => {
+                            onClearData();
+                            onClose();
+                        },
+                        },
+                    ]
+                    );
                 }}
-            >
+                >
                 <Text style={[styles.menuButtonText, { color: '#d32f2f' }]}>全データ削除</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
