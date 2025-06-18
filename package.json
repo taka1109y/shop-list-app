@@ -14,7 +14,6 @@
     "@react-native-community/slider": "^4.5.7",
     "@react-native-picker/picker": "^2.11.0",
     "expo": "~53.0.10",
-    "expo-ads-admob": "^13.0.0",
     "expo-dev-client": "~5.2.0",
     "expo-modules-core": "~2.4.0",
     "expo-notifications": "~0.31.3",
