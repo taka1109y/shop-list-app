@@ -31,7 +31,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
 }
 expoAutolinking.useExpoModules()
 
-rootProject.name = 'shopping-list-app'
+rootProject.name = '買い物ポケット'
 
 expoAutolinking.useExpoVersionCatalog()
 

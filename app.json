@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "shopping-list-app",
+    "name": "買い物ポケット",
     "slug": "shopping-list-app",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -10,27 +10,23 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#9cd4d0"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.shopping-list-app"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.shoppinglistapp"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+      "bundleIdentifier": "com.anonymous.shopping-list-app",
+      "infoPlist": {
+        "CFBundleDisplayName": "買い物ポケット"
+      }
     },
     "extra": {
       "eas": {
         "projectId": "cb7c33c0-5cb8-4374-960d-d4cb9e439632"
       }
+    },
+    "owner": "taka1109y",
+    "android": {
+      "package": "com.anonymous.shoppinglistapp"
     }
   }
 }

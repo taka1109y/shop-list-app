@@ -148,8 +148,13 @@ export default function App() {
         shouldShowList: true,
       }),
     });
-
   }, []);
+
+  useEffect(() => {
+    if (notificationEnabled) {
+      scheduleNotification(notificationTime);
+    }
+  }, [data]);
 
   useEffect(() => {
     // 保存されている設定を読み込み
@@ -162,31 +167,36 @@ export default function App() {
   }, []);
 
   const scheduleNotification = async (time: Date) => {
-    // 既存の通知を全部キャンセル
     await Notifications.cancelAllScheduledNotificationsAsync();
     if (!notificationEnabled) return;
+
+    // 「買うもの」だけを取得（added === false）
+    const hasItemsToBuy = data.some((item) => !item.added);
+    if (!hasItemsToBuy) return;
+
     const now = new Date();
     let trigger = new Date(now);
     trigger.setHours(time.getHours());
     trigger.setMinutes(time.getMinutes());
     trigger.setSeconds(0);
     if (trigger < now) {
-      // 今日の時刻を過ぎていたら翌日に
       trigger.setDate(trigger.getDate() + 1);
     }
+
     await Notifications.scheduleNotificationAsync({
       content: {
         title: "買い物リストの確認",
-        body: "まだリストが残っていませんか？忘れずチェック！",
+        body: "まだ買うものが残っていませんか？忘れずチェック！",
       },
       trigger: {
         type: 'calendar',
         hour: trigger.getHours(),
         minute: trigger.getMinutes(),
         repeats: true,
-      } as any // ← 型エラー回避
+      } as any,
     });
   };
+
 
   const handleChangeEnabled = async (enabled: boolean) => {
     setNotificationEnabled(enabled);
